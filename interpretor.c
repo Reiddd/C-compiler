@@ -64,7 +64,7 @@ int*  sp;           // pointer register
 int*  bp;           // base pointer
 int   ax;           // general-purpose register
 int   cycle;
-int index_of_bp;
+int   index_of_bp;
 
 
 // instructions
@@ -1169,7 +1169,7 @@ int eval()
     int operator;
     int* temp;
 
-    while(true){
+    while(1){
         switch(operator){
         case IMM  /* IMM <num>, load num into ax */             : ax           = *pc++;                           break;
         case LC   /* load char into ax */                       : ax           = *(char*)ax;                      break;
@@ -1221,7 +1221,7 @@ int eval()
         case MSET /* memset */                                  : ax   = (int)memset((char*)sp[2], sp[1], *sp);   break;
         case MCMP /* memcmp */                                  : ax   = memcmp((char*)sp[2], (char*)sp[1], *sp); break;
         default:
-            printf("unknown instruction %d", op);
+            printf("unknown instruction %d", operator);
             return -1;
         }
     }
@@ -1233,7 +1233,8 @@ int eval()
 
 int main(int argc, char** argv)
 {
-    int bytes_read, file_describer;
+    int i, temp;        // for later use
+    int file_describer;
     argc--;
     argv++;
 
@@ -1254,12 +1255,12 @@ int main(int argc, char** argv)
     }
 
     // read from the file
-    if( (bytes_read = read(file_describer, source, pool_size-1)) <= 0 ){
+    if( (i = read(file_describer, source, pool_size-1)) <= 0 ){
         printf("file reading encounters an error");
         return -1;
     }
 
-    source[bytes_read] = 0; // add EOF to the stream
+    source[i] = 0; // add EOF to the stream
 
     close(file_describer);  // close the file
 /* E -------------- read c file into source -------------- */
@@ -1289,8 +1290,8 @@ int main(int argc, char** argv)
 /* E -------------- virtual machine settings -------------- */
 
 /* S -------------- preload keywords and functions -------------- */
-    src = "char else enum if int return sizeof while "
-          "open read close printf malloc memset memcmp exit void main";
+    source = "char else enum if int return sizeof while "
+             "open read close printf malloc memset memcmp exit void main";
 
     // add keywords to the symbol table
     i = Char;
@@ -1325,7 +1326,7 @@ int main(int argc, char** argv)
     *--sp = PUSH; temp = sp;
     *--sp = argc;
     *--sp = (int)argv;
-    *--sp = (int)tmp;
+    *--sp = (int)temp;
 
     return eval();
 }
